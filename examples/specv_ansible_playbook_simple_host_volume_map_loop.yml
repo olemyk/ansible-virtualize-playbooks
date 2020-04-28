@@ -7,10 +7,7 @@
   gather_facts: no
   connection: local
   vars:
-    state: absent
-    mdiskgrp_default: FS840-1
-    vdisk_size_default: "20"
-    vdisk_unit_default: gb
+    state: present
   vars_files:
      - "vars/specv_vars.yml"
   tasks:

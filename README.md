@@ -1,14 +1,14 @@
-# Ansible Playbooks for  IBM Spectrum Virtualize
+# Ansible playbooks for  IBM Spectrum Virtualize
 
 
-Ansible Playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize](https://github.com/ansible-collections/ibm.spectrum_virtualize/blob/master/README.md)
+Ansible playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize](https://github.com/ansible-collections/ibm.spectrum_virtualize/blob/master/README.md)
 
 
-### Before you can use the playbooks:
+## Before you can start using the playbooks:
  
-1: Install Ansible on you computer. 
+**1: Install Ansible on you computer**
 
-2: You need to install the IBM Spectrum Virtualize collection hosted in Galaxy:
+**2: You need to install the IBM Spectrum Virtualize collection hosted in Galaxy:**
   
   - To install the IBM Spectrum Virtualize collection hosted in Galaxy:
     
@@ -20,17 +20,17 @@ Ansible Playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize
     
     ansible-galaxy collection install ibm.spectrum_virtualize --force
   
-3: Download Playbook repository
+**3: Download Playbook repository**
 
    - Simply download (clone) the repository.
    
    ```bash
-   clone https://github.com/olemyk/ansible-virtualize-playbooks ansible-virtualize-playbooks/
+   git clone https://github.com/olemyk/ansible-virtualize-playbooks ansible-virtualize-playbooks/
    ```
 
-4: *Check and run the playbooks in the examples folder*
+**4: Check and run the playbooks in the examples folder**
 
-   - Update the values in /vars/specv_vars.yml if needed.
+   - Update the values in /vars/specv_vars.yml and the playbooks
    
    - Run Playbooks with:
         - `ansible-playbook specv_ansible_playbook_*.yml`
@@ -49,10 +49,7 @@ Ansible Playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize
 - [ibm.spectrum_virtualize](https://github.com/ansible-collections/ibm.spectrum_virtualize/blob/master/README.md)
 
 
-
-### Options for Ansible Virtualize Modules.
-
-
+## Options for Ansible Virtualize Modules
 ### Spectrum Virtualize Modules
 
 - **ibm_svc_info - Collects information on the IBM Spectrum Virtualize system**
@@ -139,11 +136,12 @@ Ansible Playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize
 
 
 
-- Test for Yml
+
+### Some Playbook examples
 
 
 ```yaml
-- name: Using the IBM Spectrum Virtualize collection
+- name: Using the IBM Spectrum Virtualize collection to gater info from storage
   collections:
     - ibm.spectrum_virtualize
   gather_facts: no
@@ -162,3 +160,60 @@ Ansible Playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize
         gather_subset: targetportfc
 ```
  
+ 
+````yaml
+- name: Using the IBM Spectrum Virtualize collection to create FC host, Volumes and Map it to host
+  hosts: localhost
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  vars:
+    clustername: specv-ip
+    domain:
+    username: superuser
+    password: yourpassword
+    state: present
+    log_path: logs/playbook2.debug
+  tasks:
+    - name: Define a new FC host
+      ibm_svc_host:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: ansible-host-1
+        state: "{{ state }}"
+        fcwwpn: 10000000C9609C99:10000000C9609C98
+        iogrp: 0:1:2:3
+        protocol: scsi
+        type: generic
+      ignore_errors: false
+      
+    - name: Create volume
+      ibm_svc_vdisk:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: ansible-vdisk-1
+        state: "{{ state }}"
+        mdiskgrp: FS840-1
+        #easytier: 'off'
+        size: "20"
+        unit: gb
+      ignore_errors: false
+
+    - name: Map volume to host
+      ibm_svc_vol_map:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        volname: ansible-vdisk-1
+        host: ansible-host-1
+        state: "{{ state }}"
+````
