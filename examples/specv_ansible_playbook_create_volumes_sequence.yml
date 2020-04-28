@@ -1,0 +1,32 @@
+---
+- name: Using the IBM Spectrum Virtualize collection to create volumes
+  hosts: localhost
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  vars:
+    clustername: specvip
+    domain:
+    username: superuser
+    password: yourpassword
+    state: absent
+    mdiskgrp_default: FS840-1
+    vdisk_size_default: "30"
+    vdisk_unit_default: gb
+    log_path: /Users/olemyk/IdeaProjects/ansible-sandbox/roles/ansible-virtualize-playbooks/logs/playbook.debug
+  tasks:
+    - name: Create volume
+      ibm_svc_vdisk:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ item }}"
+        state: "{{ state }}"
+        mdiskgrp: "{{ item.mdiskgrp | default(mdiskgrp_default) }}"
+        size: "{{ item.vdisksize | default(vdisk_size_default) }}"
+        unit: "{{ item.vdiskunit | default(vdisk_unit_default) }}"
+      ignore_errors: true
+      with_sequence: start=1 end=5 format=ansible_vdisk_%02x

@@ -1,0 +1,63 @@
+
+---
+- name: Using the IBM Spectrum Virtualize collection to create an FC host
+  hosts: localhost
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  vars:
+    state: present
+  vars_files:
+     - "vars/specv_vars.yml"
+  tasks:
+    - name: Define a new FC host
+      ibm_svc_host:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ item.hostname }}"
+        state: "{{ state }}"
+        fcwwpn: "{{ item.fcwwpn }}"
+        #iogrp: 1:2:3:4
+        protocol: "{{ item.protocol | default('scsi') }}"
+        type: "{{ item.hosttype | default('generic') }}"
+      ignore_errors: false
+      loop:
+        - { hostname: 'ansible-host1', fcwwpn: '10000000C9609C78:10000000C9609C77' }
+        - { hostname: 'ansible-host2', fcwwpn: '10000000C9609C74:10000000C9609C75' }
+
+    - name: Create volume
+      ibm_svc_vdisk:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ item.vdiskname }}"
+        state: "{{ state }}"
+        mdiskgrp: "{{ item.mdiskgrp | default(mdiskgrp_default) }}"
+        #easytier: 'off'
+        size: "{{ item.vdisksize | default(vdisk_size_default)}}"
+        unit: "{{ item.vdiskunit | default(vdisk_unit_default)}}"
+      ignore_errors: false
+      loop:
+        - { vdiskname: 'ansible-host1-vdisk1', vdisksize: "{{ vdisk_size_default }}", vdiskunit: 'gb', mdiskgrp: 'FS840-2' }
+        - { vdiskname: 'ansible-host2-vdisk2', vdisksize: '30' }
+
+    - name: Map volume to host
+      ibm_svc_vol_map:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        volname: "{{ item.vdiskname }}"
+        host: "{{ item.hostname }}"
+        state: "{{ state }}"
+      loop:
+        - { vdiskname: 'ansible-host1-vdisk1', hostname: 'ansible-host1' }
+        - { vdiskname: 'ansible-host2-vdisk2', hostname: 'ansible-host2' }
+

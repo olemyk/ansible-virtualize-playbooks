@@ -1,0 +1,40 @@
+#---
+### Host to Create
+#hosts:
+#  - hostname: 'ansible-host1'
+#    fcwwpn: '10000000C9609C78:10000000C9609C77'
+#  - hostname: 'ansible-host2'
+#    fcwwpn: '10000000C9609C74:10000000C9609C75'
+### Volumes to create
+#volumes:
+#  - vdiskname: 'ansible-host1-vdisk1'
+#    vdisksize: "{{ vdisk_size_default }}"
+#    vdiskunit: 'gb'
+#    mdiskgrp: 'FS840-2'
+#
+#  - vdiskname: 'ansible-host2-vdisk2'
+#    vdisksize: '30'
+#
+### Volumes mapping
+#volume_mapping:
+#  - vdiskname: 'ansible-host1-vdisk1'
+#    hostname: 'ansible-host1'
+#  - vdiskname: 'ansible-host2-vdisk2'
+#    hostname: 'ansible-host2'
+#
+#
+#### json like options.####
+---
+### Host to Create or Remove
+hosts:
+  - { hostname: 'ansible-host1', fcwwpn: '10000000C9609C78:10000000C9609C77' }
+  - { hostname: 'ansible-host2', fcwwpn: '10000000C9609C74:10000000C9609C75' }
+## Volumes to Create or Remove
+volumes:
+  - { vdiskname: 'ansible-host1-vdisk1', vdisksize: "{{ vdisk_size_default }}", vdiskunit: 'gb', mdiskgrp: 'FS840-2' }
+  - { vdiskname: 'ansible-host2-vdisk1', vdisksize: '30' }
+## Volumes mapping to Create or Remove
+volume_mapping:
+  - { vdiskname: 'ansible-host1-vdisk1', hostname: 'ansible-host1' }
+  - { vdiskname: 'ansible-host2-vdisk1', hostname: 'ansible-host2' }
+
