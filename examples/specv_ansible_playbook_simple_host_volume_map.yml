@@ -11,7 +11,7 @@
     domain:
     username: superuser
     password: yourpassword
-    state: absent
+    state: present
     log_path: logs/playbook2.debug
   tasks:
     - name: Define a new FC host
