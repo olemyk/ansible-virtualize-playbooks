@@ -1,147 +1,164 @@
-# Ansible-Boilerplate
+# Ansible Playbooks for  IBM Spectrum Virtualize
 
-[![GitHub Issues](https://img.shields.io/github/issues/acch/ansible-boilerplate.svg)](https://github.com/acch/ansible-boilerplate/issues) [![GitHub Stars](https://img.shields.io/github/stars/acch/ansible-boilerplate.svg?label=github%20%E2%98%85)](https://github.com/acch/ansible-boilerplate/) [![License](https://img.shields.io/github/license/acch/ansible-boilerplate.svg)](LICENSE)
 
-[Ansible](https://www.ansible.com/) is a configuration management tool, similar to [Chef](https://www.chef.io/) and [Puppet](https://puppet.com/). It allows for performing logical configuration of infrastructure components, such as servers and network switches. The configuration files in this repository can act as a template for your own Ansible projects, in order to get you started quickly. Once you've customized the configuration files then new servers can be configured quickly &mdash; excluding their network configuration. This means that adding new servers is as simple as:
+Ansible Playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize](https://github.com/ansible-collections/ibm.spectrum_virtualize/blob/master/README.md)
 
-- Base OS installation of new server
-- Network configuration of new server (including bond, bridge, DNS and routing)
-- Configuration of password-less (public key) SSH authentication from the Ansible host (your laptop) to the new server
 
-The remaining configuration (installing packages, configuring services, etc.) can then be achieved using Ansible. In addition, Ansible ensures that configuration of all servers is and remains consistent.
+### Before you can use the playbooks:
+ 
+1: Install Ansible on you computer. 
 
-## Using this repository
+2: You need to install the IBM Spectrum Virtualize collection hosted in Galaxy:
+  
+  - To install the IBM Spectrum Virtualize collection hosted in Galaxy:
+    
+    
+    ansible-galaxy collection install ibm.spectrum_virtualize
+    
+    
+   - To upgrade to the latest version of the IBM Spectrum Virtualize collection:
+    
+    ansible-galaxy collection install ibm.spectrum_virtualize --force
+  
+3: Download Playbook repository
 
-Simply download (clone) the repository and start modifying files according to your needs.
+   - Simply download (clone) the repository.
+   
+   ```bash
+   clone https://github.com/olemyk/ansible-virtualize-playbooks ansible-virtualize-playbooks/
+   ```
 
+4: *Check and run the playbooks in the examples folder*
+
+   - Update the values in /vars/specv_vars.yml if needed.
+   
+   - Run Playbooks with:
+        - `ansible-playbook specv_ansible_playbook_*.yml`
+   - For verbose output you can run the ansible-playbook command with the option: -v
+        - `ansible-playbook specv_ansible_playbook_*.yml -v`
+   - To use Ansible extra-vars function. 
+        - You can use the playbook with the vars defined. 
+                    
+            `ansible-playbook /examples/specv_ansible_playbook_simple_host_volume_map_extra_vars.yml --extra-vars "hostname=ansible-host1 fcwwpn=10000000C9609C78:10000000C9609C77 state=present vdiskname=ansible-vdisk1 vdisksize=10 vdiskunit=kb mdiskgrp=FS840-2"  -vv `
+
+
+
+## Requirements
+
+- Ansible version 2.9 or higher
+- [ibm.spectrum_virtualize](https://github.com/ansible-collections/ibm.spectrum_virtualize/blob/master/README.md)
+
+
+
+### Options for Ansible Virtualize Modules.
+
+
+### Spectrum Virtualize Modules
+
+- **ibm_svc_info - Collects information on the IBM Spectrum Virtualize system**
+- **ibm_svc_host - Host management for IBM Spectrum Virtualize**
+- **ibm_svc_mdisk - MDisk managment for IBM Spectrum Virtualize**
+- **ibm_svc_mdiskgrp - Pool management for IBM Spectrum Virtualize**
+- **ibm_svc_vdisk - Volume management for IBM Spectrum Virtualize**
+
+
+- PS:  Missing option info about mdisk and mdiskgrp, will be add later
+    
+    
+### For all modules - Common option
+
+ | **Option**    | **Type**    | **Required**  | **Default**| **Description** |
+| :------------ |:---------------:| ----------:| ------:|--------------------------------:|
+| clustername   |     str         |   true     |        | The hostname or management IP of the SV storage system |  
+| domain        |     str         |   false    |        | Domain for the IBM Spectrum Virtualize storage system
+| username      |     str         |   true     |        | REST API username for the IBM Spectrum Virtualize storage system
+| password      |     str         |   true     |        | REST API password for the IBM Spectrum Virtualize storage system
+|validate_certs | bool (true/false)|  false    |  false | Validate certification
+| log_path      | path            |   false    |        | Debugs log for this file
+
+
+
+
+
+### This module manages hosts on IBM Spectrum Virtualize.
+#### Module: ibm_svc_host
+
+| **Option** | **Type**| **Required**  | **Default**|**Choices** | **Description** | 
+| :---------- |:---------| --------:| -------------:|-----------:|----------------:|
+| name        |      str |  true    |               |            | Specifies a name or label for the new host object |  
+| fcwwpn      |      str |  false   |               |            | List of Initiator WWN to be added to the host
+| iscsiname   |      str |  false   |               |            | Initiator IQN to be added to the host system
+| iogrp       |      str |  false   | 1:2:3:4       |            | Specifies a set of one or more (I/O) groups that the host can access the volumes from
+| protocol    |      str |  false   | scsi          |"scsi", "nvme" | Specifies the protocol used by the host to communicate with the storage 
+| type        |      str |  false   | generic       |            |Specifies the type of host
+| state       |      str |  false   | generic       |  absent, present |Creates (C(present)) or removes (C(absent)) a host
+
+### This module manages volumes on IBM Spectrum Virtualize.
+#### Module: ibm_svc_vdisk
+| **Option** | **Type**| **Required**  | **Default**|**Choices** |  **Description** | 
+| :---------- |:---------| --------:| -------:|-------------------------:|------:|
+| name        |      str |  true    |         |                          | Specifies a name to assign to the new volume |  
+| mdiskgrp    |      str |  true    |         |                          |Specifies one or more storage pools name to use when you are creating this volume
+| easytier    |          |  false   |   off   | on, off, auto            | Defines use of easytier with VDisk
+| size        |          |  false   | 1:2:3:4 |                          | Defines size of VDisk 
+|protocol     |      str |  false   | scsi    | b, kb, mb, gb, tb, pb    |"Defines the size optoin for the storage unit 
+| state       |      str |  false   | generic |  absent, present         |Creates (C(present)) or removes (C(absent)) a volume
+
+
+
+## This module gathers various information from the IBM Spectrum Virtualize.
+### Module: ibm_svc_info
+
+| **Option** | **Type**| **Required** | **Description** | 
+| :---------- |:---------| ----------:|------------------:|
+| gather_subset| list    |  false     |  Collects storage information
+
+
+#### gather_subset:
+
+|**Values**   | **Description**                       | 
+| :---------- |:------------------------------------| 
+|all          | list of all IBM Spectrum Virtualize entities supported by the module |
+|vol  		  | lists information for VDisks
+|pool  	      | lists information for mdiskgrps
+|node         | lists information for nodes
+|iog          | lists information for I/O groups
+|host         | lists information for hosts
+|hc           | lists information for host clusters
+|fc           | lists information for FC connectivity
+|fcport       | lists information for FC ports
+|targetportfc | lists information for WWPN which is required to set up FC zoning and to display the current failover status of host I/O ports
+|fcmap        | lists information for FC maps
+|fcconsistgrp | displays a concise list or a detailed view of FlashCopy consistency groups
+|iscsiport    | lists information for iSCSI ports
+|vdiskcopy    | lists information for volume copy
+|nf           | lists information for NVMe fabric
+|array        | lists information for array MDisks
+|system       |displays the storage system information
+|default      | "all"
+
+
+
+- Test for Yml
+
+
+```yaml
+- name: Using the IBM Spectrum Virtualize collection
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  hosts: localhost
+  tasks:
+    - name: Gather info from storage
+      ibm_svc_info:
+        clustername: specvip
+        domain:
+        username: superuser
+        password: yourpassword
+        log_path: logs/playbook.debug
+        name: gather_info
+        state: info
+        gather_subset: targetportfc
 ```
-git clone https://github.com/acch/ansible-boilerplate.git myAnsibleProject/
-```
-
-Ideally, you'll want to use [Git](https://git-scm.com/) to manage your Ansible configuration files. For that purpose simply [fork](https://help.github.com/articles/fork-a-repo/) this repository into your own Git repository before cloning and customizing it. Alternatively, create your own repository [from the template](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template). Git will allow you to version and roll-back changes with ease.
-
-Specifically, you'll want to customize the following files:
-- Add your own hosts and groups to file `hosts`. You'll want to replace `[anygroup]` with a more meaningful group name, and add your own groups as required.
-- Define roles by adding subdirectories underneath directory `roles/`. You'll want to rename `anyrole/` to a more meaningful role name, and add your own roles as required.
-- Associate your hosts (groups) with your roles by adding appropriate playbooks in the root directory. Rename `anygroup.yml` to a more meaningful playbook name.
-- Import all your playbooks in the main `site.yml` playbook.
-
-## Using Ansible
-
-Install `ansible` on your laptop and link the `hosts` file from `/etc/ansible/hosts` to the file in your repository. Now you're all set.
-
-To run a single (ad-hoc) task on multiple servers:
-
-```
-# Check connectivity
-ansible all -m ping -u root
-
-# Run single command on all servers
-ansible all -m command -a "cat /etc/hosts" -u root
-
-# Run single command only on servers in specific group
-ansible anygroup -m command -a "cat /etc/hosts" -u root
-
-# Run single command on individual server
-ansible server1 -m command -a "cat /etc/hosts" -u root
-```
-
-As the `command` module is the default, it can also be omitted:
-
-```
-ansible server1 -a "cat /etc/hosts" -u root
-```
-
-To use shell variables on the remote server, use the `shell` module instead of `command`, and use single quotes for the argument:
-
-```
-ansible server1 -m shell -a 'echo $HOSTNAME' -u root
-```
-
-The true power of ansible comes with so called *playbooks* &mdash; think of them as scripts, but they're declarative. Playbooks allow for running multiple tasks on any number of servers, as defined in the configuration files (`*.yml`):
-
-```
-# Run all tasks on all servers
-ansible-playbook site.yml -v
-
-# Run all tasks only on group of servers
-ansible-playbook anygroup.yml -v
-
-# Run all tasks only on individual server
-ansible-playbook site.yml -v -l server1
-```
-
-Note that `-v` produces verbose output. `-vv` and `-vvv` are also available for even more (debug) output.
-
-To verify what tasks would do without changing the actual configuration, use the `--list-hosts` and `--check` parameters:
-
-```
-# Show hosts that would be affected by playbook
-ansible-playbook site.yml --list-hosts
-
-# Perform dry-run to see what tasks would do
-ansible-playbook site.yml -v --check
-```
-
-Running all tasks in a playbook may take a long time. *Tags* are available to organize tasks so one can only run specific tasks to configure a certain component:
-
-```
-# Show list of available tags
-ansible-playbook site.yml --list-tags
-
-# Only run tasks required to configure DNS
-ansible-playbook site.yml -v -t dns
-```
-
-Note that the above command requires you to have tasks defined with the `tags: dns` attribute.
-
-## Configuration files
-
-The `hosts` file defines all hosts and groups which they belong to. Note that a single host can be member of multiple groups. Define groups for each rack, for each network, or for each environment (e.g. production vs. test).
-
-### Playbooks
-
-Playbooks associate hosts (groups) with roles. Define a separate playbook for each of your groups, and then import all playbooks in the main `site.yml` playbook.
-
-File | Description
----- | -----------
-`site.yml` | Main playbook - runs all tasks on all servers
-`anygroup.yml` | Group playbook - runs all tasks on servers in group *anygroup*
-
-### Roles
-
-The group playbooks (e.g. `anygroup.yml`) simply associate hosts with roles. Actual tasks are defined in these roles:
-
-```
-roles/
-├── common/             Applied to all servers
-│   ├── handlers/
-│   ├── tasks/
-│   │   └ main.yml      Tasks for all servers
-│   └── templates/
-└── anyrole/            Applied to servers in specific group(s)
-    ├── handlers/
-    ├── tasks/
-    │   └ main.yml      Tasks for specific group(s)
-    └── templates/
-```
-
-Consider adding separate roles for different applications (e.g. webservers, dbservers, hypervisors, etc.), or for different responsibilities which servers fulfill (e.g. infra_server vs. infra_client).
-
-### Tags
-
-Use the following command to show a list of available tags:
-
-```
-ansible-playbook site.yml --list-tags
-```
-
-Consider adding tags for individual components (e.g. DNS, NTP, HTTP, etc.).
-
-Role | Tags
---- | ---
-Common | all,check
-
-## Copyright and license
-
-Copyright 2017 Achim Christ, released under the [MIT license](LICENSE)
+ 

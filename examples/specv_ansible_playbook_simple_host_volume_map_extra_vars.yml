@@ -1,0 +1,58 @@
+---
+##
+## To use this playbook use vars or extra vars  #
+##  ansible-playbook spectrum_Virtualize_ansible_playbook_short_extra_vars.yml --extra-vars "hostname=ansible-host1 fcwwpn=10000000C9609C78:10000000C9609C77 state=present vdiskname=ansible-vdisk1 vdisksize=10 vdiskunit=gb mdiskgrp=FS840-2"  -vv
+##
+- name: Using the IBM Spectrum Virtualize collection to create FC host, Volumes and Map it to host
+  hosts: localhost
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  vars:
+    clustername: specvip
+    domain:
+    username: superuser
+    password: yourpassword
+    log_path: logs/playbook.debug
+  tasks:
+    - name: Remove or Define a new FC host
+      ibm_svc_host:
+        clustername: "{{ clustername }}"
+        domain: "{{ domain }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ hostname }}"
+        state: "{{ state }}"
+        fcwwpn: "{{ fcwwpn }}"
+        #iogrp: 1:2:3:4
+        protocol: "{{ protocol | default('scsi') }}"
+        type: "{{ hosttype | default('generic') }}"
+      ignore_errors: false
+
+    - name: Create volume
+      ibm_svc_vdisk:
+        clustername: "{{ clustername }}"
+        domain: "{{ domain }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ vdiskname }}"
+        state: "{{ state }}"
+        mdiskgrp: "{{ mdiskgrp }}"
+        size: "{{ vdisksize }}"
+        unit: "{{ vdiskunit | default(gb)}}"
+      ignore_errors: false
+
+    - name: Map volume to host
+      ibm_svc_vol_map:
+        clustername: "{{ clustername }}"
+        domain: "{{ domain }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        volname: "{{ vdiskname }}"
+        host: "{{ hostname }}"
+        state: "{{ state }}"
+      ignore_errors: false

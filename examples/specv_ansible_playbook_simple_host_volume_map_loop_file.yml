@@ -1,0 +1,56 @@
+---
+- name: Using the IBM Spectrum Virtualize collection to create an FC hos
+  hosts: localhost
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  vars:
+    state: present
+  vars_files:
+    - vars/specv_vars_host_vdisk_mapping.yml
+    - vars/specv_vars.yml
+  tasks:
+    - name: Define a new FC host
+      ibm_svc_host:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ item.hostname }}"
+        state: "{{ state }}"
+        fcwwpn: "{{ item.fcwwpn }}"
+        #iogrp: 1:2:3:4
+        protocol: "{{ item.protocol | default('scsi') }}"
+        type: "{{ item.hosttype | default('generic') }}"
+      ignore_errors: true
+      loop: "{{ hosts }}"
+
+    - name: Create volume
+      ibm_svc_vdisk:
+        clustername: "{{ clustername }}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: "{{ item.vdiskname }}"
+        state: "{{ state }}"
+        mdiskgrp: "{{ item.mdiskgrp | default(mdiskgrp_default) }}"
+        #easytier: 'off'
+        size: "{{ item.vdisksize | default(vdisk_size_default)}}"
+        unit: "{{ item.vdiskunit | default(vdisk_unit_default)}}"
+      ignore_errors: true
+      loop: "{{ volumes }}"
+
+    - name: Map volume to host
+      ibm_svc_vol_map:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        volname: "{{ item.vdiskname }}"
+        host: "{{ item.hostname }}"
+        state: "{{ state }}"
+      loop: "{{ volume_mapping }}"

@@ -1,0 +1,56 @@
+# Change the variables in vars and
+---
+- name: Using the IBM Spectrum Virtualize collection to create FC host, Volumes and Map it to host
+  hosts: localhost
+  collections:
+    - ibm.spectrum_virtualize
+  gather_facts: no
+  connection: local
+  vars:
+    clustername: ipordns
+    domain:
+    username: superuser
+    password: yourpassword
+    state: absent
+    log_path: logs/playbook2.debug
+  tasks:
+    - name: Define a new FC host
+      ibm_svc_host:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: ansible-host-1
+        state: "{{ state }}"
+        fcwwpn: 10000000C9609C99:10000000C9609C98
+        iogrp: 0:1:2:3
+        protocol: scsi
+        type: generic
+      ignore_errors: false
+
+    - name: Create volume
+      ibm_svc_vdisk:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        name: ansible-vdisk-1
+        state: "{{ state }}"
+        mdiskgrp: FS840-1
+        #easytier: 'off'
+        size: "20"
+        unit: gb
+      ignore_errors: false
+
+    - name: Map volume to host
+      ibm_svc_vol_map:
+        clustername: "{{clustername}}"
+        domain: "{{domain}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        log_path: "{{ log_path | default('logs/playbook.debug') }}"
+        volname: ansible-vdisk-1
+        host: ansible-host-1
+        state: "{{ state }}"
