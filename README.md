@@ -85,7 +85,7 @@ Ansible playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize
 | name        |      str |  true    |               |            | Specifies a name or label for the new host object |  
 | fcwwpn      |      str |  false   |               |            | List of Initiator WWN to be added to the host
 | iscsiname   |      str |  false   |               |            | Initiator IQN to be added to the host system
-| iogrp       |      str |  false   | 1:2:3:4       |            | Specifies a set of one or more (I/O) groups that the host can access the volumes from
+| iogrp       |      str |  false   | 0:1:2:3       |            | Specifies a set of one or more (I/O) groups that the host can access the volumes from
 | protocol    |      str |  false   | scsi          |"scsi", "nvme" | Specifies the protocol used by the host to communicate with the storage 
 | type        |      str |  false   | generic       |            |Specifies the type of host
 | state       |      str |  false   | generic       |  absent, present |Creates (C(present)) or removes (C(absent)) a host
@@ -97,8 +97,8 @@ Ansible playbooks examples for the Ansible Collection - [ibm.spectrum_virtualize
 | name        |      str |  true    |         |                          | Specifies a name to assign to the new volume |  
 | mdiskgrp    |      str |  true    |         |                          |Specifies one or more storage pools name to use when you are creating this volume
 | easytier    |          |  false   |   off   | on, off, auto            | Defines use of easytier with VDisk
-| size        |          |  false   | 1:2:3:4 |                          | Defines size of VDisk 
-|protocol     |      str |  false   | scsi    | b, kb, mb, gb, tb, pb    |"Defines the size optoin for the storage unit 
+| size        |          |  false   |         |                          | Defines size of VDisk 
+| unit        |      str |  false   |  mb     | b, kb, mb, gb, tb, pb   |"Defines the size optoin for the storage unit 
 | state       |      str |  false   | generic |  absent, present         |Creates (C(present)) or removes (C(absent)) a volume
 
 
